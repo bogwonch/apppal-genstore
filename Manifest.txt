@@ -1,0 +1,2 @@
+Class-Path: lib/AppPAL.jar
+Main-Class: genstore/GenStore
