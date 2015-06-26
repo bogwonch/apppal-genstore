@@ -1,6 +1,6 @@
 JC=javac
 JFLAGS=-Xlint:unchecked
-CLASSPATH=lib/AppPAL.jar:lib/hamcrest-core-1.3.jar:lib/junit-4.12.jar:lib/takari-cpsuite-1.2.7-SNAPSHOT.jar
+CLASSPATH=.:lib/AppPAL.jar:lib/hamcrest-core-1.3.jar:lib/junit-4.12.jar:lib/takari-cpsuite-1.2.7-SNAPSHOT.jar
 
 MANIFEST=Manifest.txt
 TARGET_JAR=genstore.jar
