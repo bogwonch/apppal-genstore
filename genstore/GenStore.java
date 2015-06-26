@@ -1,6 +1,7 @@
 package genstore;
 
 import apppal.logic.evaluation.AC;
+import genstore.Data;
 import genstore.Log;
 import genstore.Options;
 import java.io.File;
@@ -12,18 +13,21 @@ public class GenStore
 {
   private final AC ac;
   private final Options options;
+  private final Data data;
 
   public GenStore(Options options)
   {
     Log.debug("options: "+options);
     this.ac = new AC();
+    this.data = new Data();
     this.options = options;
 
     this.parsePolicies();
+    this.loadData();
   }
 
   private void parsePolicies()
-  { Log.debug("loading policies");
+  { Log.debug("importing policies");
     for (final File policy: this.options.policies)
     { if (policy.isFile()) this.parsePolicy(policy);
       else if (policy.isDirectory()) this.parsePolicyDirectory(policy);
@@ -44,6 +48,14 @@ public class GenStore
     { this.parsePolicy(file); }
   }
 
+  private void loadData()
+  { Log.debug("importing data");
+    for (final File dir: this.options.data)
+    { Log.debug("importing data directory '"+dir+"'");
+      this.data.load(dir);
+    }
+  }
+
   public static void main(final String[] args)
   { Options options = new Options(args);
     GenStore genstore = new GenStore(options);
@@ -54,11 +66,6 @@ public class GenStore
   { public boolean accept(final File dir, final String file)
     { return file.endsWith(".policy") || file.endsWith(".spp");
     }
-  }
-
-  class APKFilter implements FilenameFilter
-  { public boolean accept(final File dir, final String file)
-    { return file.endsWith(".apk"); }
   }
 }
 
