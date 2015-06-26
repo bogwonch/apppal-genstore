@@ -14,13 +14,17 @@ SRC=$(shell git ls-files \*.java)
 # WARNING: use GNU make or build each step in all in order ;-)
 all: | classes jar test
 
+lint: | clean
+	@infer -- make classes
+
 jar: $(TARGET_JAR)
 
 # Compile each Java source file
 classes: $(SRC:.java=.class)
 
 $(TARGET_JAR): classes $(MANIFEST)
-	jar cfm $(@) $(MANIFEST) genstore lib
+	@mkdir -p target
+	@jar cfm target/$(@) $(MANIFEST) genstore lib
 
 clean:
 	$(RM) $(SRC:.java=.class) $(TARGET_JAR)
