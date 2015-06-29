@@ -18,7 +18,7 @@ class Data
   public void load(File dir)
   { Log.debug("loading data dir '"+dir+"'");
     this.validate(dir);
-    this.populateAPKs(dir);
+    this.populate(dir);
   }
 
 
@@ -41,6 +41,19 @@ class Data
 
     if (! apkDir(dir).isDirectory())
       Log.warn("data directory '"+dir+"' missing apks");
+  }
+
+  private void populate(File dir)
+  {
+    this.populateAPKs(dir);
+    File permissions_dir = new File(dir+"/permissions");
+    if (! permissions_dir.exists())
+      try
+      { Log.debug("creating permissions dir '"+permissions_dir+"'");
+        permissions_dir.mkdir();
+      }
+      catch (SecurityException e)
+      { Log.error("couldn't create permissions directory: "+e); }
   }
 
   class APKFilter implements FilenameFilter
