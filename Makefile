@@ -3,7 +3,7 @@ JFLAGS=-Xlint:unchecked
 CLASSPATH=.:lib/AppPAL.jar:lib/hamcrest-core-1.3.jar:lib/junit-4.12.jar:lib/takari-cpsuite-1.2.7-SNAPSHOT.jar
 
 MANIFEST=Manifest.txt
-TARGET_JAR=genstore.jar
+TARGET_JAR=target/genstore.jar
 
 %.class: %.java
 	$(JC) $(JFLAGS) -cp $(CLASSPATH) $<
@@ -24,7 +24,7 @@ classes: $(SRC:.java=.class)
 
 $(TARGET_JAR): classes $(MANIFEST)
 	@mkdir -p target
-	@jar cfm target/$(@) $(MANIFEST) genstore lib
+	jar cfm $(@) $(MANIFEST) genstore lib
 
 clean:
 	$(RM) $(SRC:.java=.class) $(TARGET_JAR)
