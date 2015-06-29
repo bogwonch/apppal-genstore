@@ -21,7 +21,6 @@ class Data
     this.populate(dir);
   }
 
-
   private final File apkDir(File dir) { return new File(dir+"/apks"); }
 
   private void populateAPKs(File dir)
