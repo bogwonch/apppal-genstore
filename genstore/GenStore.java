@@ -30,6 +30,8 @@ public class GenStore
 
     final int prepared = this.builder.prepare();
     Log.debug("found " + prepared + " apps for the store.");
+
+    this.builder.build();
   }
 
   private void parsePolicies()

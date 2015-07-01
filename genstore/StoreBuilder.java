@@ -8,6 +8,13 @@ import genstore.APK;
 import genstore.Data;
 import genstore.Log;
 import java.lang.Boolean;
+import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -21,6 +28,8 @@ public class StoreBuilder
   private final AC ac;
   private final Set<APK> sellable;
   private final Map<String, List<APK>> categorizations;
+  private final File output;
+  private Connection conn;
 
   public StoreBuilder(Data data, AC ac)
   {
@@ -29,6 +38,9 @@ public class StoreBuilder
 
     this.sellable = new LinkedHashSet<>();
     this.categorizations = new HashMap<>();
+
+    this.output = new File("output/" + this.data.config.name);
+    this.conn = null;
   }
 
   public int prepare()
@@ -36,8 +48,35 @@ public class StoreBuilder
     Log.debug("preparing store");
     this.pickApps();
     this.pickCategories();
-
     return this.sellable.size();
+  }
+
+  public void build()
+  {
+    Log.debug("building store");
+    output.mkdirs();
+
+    try
+    {
+      this.conn = DriverManager.getConnection("jdbc:sqlite:" + this.output.toString() + "/store.db");
+      this.createTables();
+    }
+    catch (SQLException e)
+    {
+      Log.error("database error: " + e);
+    }
+    finally
+    {
+      try
+      {
+        if (this.conn != null) this.conn.close();
+      }
+      catch (SQLException e)
+      {
+        Log.error("cannot close database");
+      }
+    }
+
   }
 
   private void pickApps()
@@ -76,6 +115,44 @@ public class StoreBuilder
       }
       this.categorizations.put(category, found);
       Log.debug("found " + found.size() + " apps with category '" + category + "'");
+    }
+  }
+
+  public void createTables() throws SQLException
+  {
+    final Statement statement = this.conn.createStatement();
+    statement.setQueryTimeout(30);
+
+    Log.debug("creating tables");
+    statement.executeUpdate("DROP TABLE IF EXISTS apk");
+    statement.executeUpdate("DROP TABLE IF EXISTS category");
+    statement.executeUpdate("DROP TABLE IF EXISTS apk_category");
+    statement.executeUpdate("CREATE TABLE apk(id TEXT PRIMARY KEY)");
+    statement.executeUpdate("CREATE TABLE category(name TEXT PRIMARY KEY)");
+    statement.executeUpdate("CREATE TABLE apk_category(apk TEXT, category TEXT, FOREIGN KEY(apk) REFERENCES apk(id), FOREIGN KEY(category) REFERENCES category(name))");
+
+    Log.debug("adding apks");
+    final PreparedStatement insertAPK = this.conn.prepareStatement("INSERT INTO apk VALUES (?)");
+    for (APK apk : this.sellable)
+    {
+      insertAPK.setString(1, apk.toString());
+      insertAPK.executeUpdate();
+    }
+
+    Log.debug("adding categories");
+    final PreparedStatement insertCategory = this.conn.prepareStatement("INSERT INTO category VALUES (?)");
+    final PreparedStatement insertCategorization = this.conn.prepareStatement("INSERT INTO apk_category VALUES (?, ?)");
+    for (final String category : this.categorizations.keySet())
+    {
+      insertCategory.setString(1, category);
+      insertCategory.executeUpdate();
+
+      for (APK apk : this.categorizations.get(category))
+      {
+        insertCategorization.setString(1, apk.toString());
+        insertCategorization.setString(2, category);
+        insertCategorization.executeUpdate();
+      }
     }
   }
 }

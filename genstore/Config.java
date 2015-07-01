@@ -16,16 +16,27 @@ public class Config
 {
   private final JSONParser parser;
   public final Set<String> categories;
+  public String name;
 
   public Config(File file)
   {
     Log.debug("reading config file '" + file + "'");
     this.parser = new JSONParser();
     this.categories = new LinkedHashSet<>();
+    this.name = null;
+    JSONObject config = null;
+
     try
     {
-      final JSONObject config;
       config = (JSONObject) parser.parse(new FileReader(file));
+
+      Log.debug("extracting name");
+      this.name = (String) config.get("name");
+      if (this.name == null)
+      {
+        Log.warn("missing store name calling store 'store'");
+        this.name = "store";
+      }
 
       Log.debug("extracting categories");
       for (final Object obj : ((JSONArray) config.get("categories")))
