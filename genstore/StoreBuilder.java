@@ -77,6 +77,13 @@ public class StoreBuilder
       }
     }
 
+    Log.debug("copying apks");
+    for (final APK apk : this.sellable)
+    {
+      apk.copyAPK(new File(this.output + "/public/apks"));
+      apk.copyIcon(new File(this.output + "/public/icons"));
+    }
+
   }
 
   private void pickApps()
@@ -116,6 +123,10 @@ public class StoreBuilder
       this.categorizations.put(category, found);
       Log.debug("found " + found.size() + " apps with category '" + category + "'");
     }
+  }
+
+  private void copyAPKs()
+  {
   }
 
   public void createTables() throws SQLException
