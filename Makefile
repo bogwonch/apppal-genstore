@@ -12,7 +12,10 @@ TARGET_JAR=target/genstore.jar
 SRC=$(shell git ls-files \*.java)
 
 # WARNING: use GNU make or build each step in all in order ;-)
-all: | classes jar test
+all: | classes jar test tags
+
+tags: 
+	ctags -R .
 
 lint: | clean
 	@infer -- make classes
