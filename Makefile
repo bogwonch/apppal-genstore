@@ -31,6 +31,7 @@ $(TARGET_JAR): classes $(MANIFEST)
 
 clean:
 	$(RM) $(SRC:.java=.class) $(TARGET_JAR)
+	$(RM) $(wildcard output/*)
 
 test: $(TARGET_JAR)
 	 @for test in `find genstore/test -name \*Test.java`; do \

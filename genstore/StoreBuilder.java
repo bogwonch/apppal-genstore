@@ -7,6 +7,7 @@ import apppal.logic.language.Assertion;
 import genstore.APK;
 import genstore.Data;
 import genstore.Log;
+import genstore.TemplateStore;
 import java.lang.Boolean;
 import java.io.File;
 import java.sql.Connection;
@@ -29,17 +30,19 @@ public class StoreBuilder
   private final Set<APK> sellable;
   private final Map<String, List<APK>> categorizations;
   private final File output;
+  private final TemplateStore template;
   private Connection conn;
 
   public StoreBuilder(Data data, AC ac)
   {
     this.data = data;
     this.ac = ac;
-
     this.sellable = new LinkedHashSet<>();
     this.categorizations = new HashMap<>();
-
-    this.output = new File("output/" + this.data.config.name);
+    this.output = new File("output/" + this.data.config.name.replace(' ', '_'));
+    if (this.output.exists())
+      Log.error("will not overwrite existing store '" + this.output + "'");
+    this.template = new TemplateStore(new File("./template/"));
     this.conn = null;
   }
 
@@ -54,7 +57,10 @@ public class StoreBuilder
   public void build()
   {
     Log.debug("building store");
-    output.mkdirs();
+    this.output.mkdirs();
+
+    Log.debug("copying app structure");
+    this.template.install(this.output);
 
     try
     {
@@ -125,10 +131,6 @@ public class StoreBuilder
     }
   }
 
-  private void copyAPKs()
-  {
-  }
-
   public void createTables() throws SQLException
   {
     final Statement statement = this.conn.createStatement();
@@ -138,9 +140,11 @@ public class StoreBuilder
     statement.executeUpdate("DROP TABLE IF EXISTS apk");
     statement.executeUpdate("DROP TABLE IF EXISTS category");
     statement.executeUpdate("DROP TABLE IF EXISTS apk_category");
+    statement.executeUpdate("DROP TABLE IF EXISTS config");
     statement.executeUpdate("CREATE TABLE apk(id TEXT PRIMARY KEY)");
     statement.executeUpdate("CREATE TABLE category(name TEXT PRIMARY KEY)");
     statement.executeUpdate("CREATE TABLE apk_category(apk TEXT, category TEXT, FOREIGN KEY(apk) REFERENCES apk(id), FOREIGN KEY(category) REFERENCES category(name))");
+    statement.executeUpdate("CREATE TABLE config(key TEXT PRIMARY KEY, value TEXT)");
 
     Log.debug("adding apks");
     final PreparedStatement insertAPK = this.conn.prepareStatement("INSERT INTO apk VALUES (?)");
@@ -165,5 +169,11 @@ public class StoreBuilder
         insertCategorization.executeUpdate();
       }
     }
+
+    Log.debug("adding metadata");
+    final PreparedStatement insertMeta = this.conn.prepareStatement("INSERT INTO config VALUES (?, ?)");
+    insertMeta.setString(1, "name");
+    insertMeta.setString(2, this.data.config.name);
+    insertMeta.executeUpdate();
   }
 }
