@@ -1,3 +1,6 @@
 [submodule "template"]
 	path = template
 	url = git@github.com:bogwonch/apppal-genstores-template.git
+[submodule "libapppal"]
+	path = libapppal
+	url = git@github.com:bogwonch/libapppal
