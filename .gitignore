@@ -3,7 +3,6 @@
 *.apk
 *.class
 infer-out/
-libapppal/
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
