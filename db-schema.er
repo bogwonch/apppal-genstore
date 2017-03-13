@@ -1,0 +1,16 @@
+[apk]
+*id
+
+[category]
+*name
+
+[apk_category]
++apk
++category
+
+[config]
+*key
+value
+
+apk *--+ apk_category
+category 1--* apk_category
