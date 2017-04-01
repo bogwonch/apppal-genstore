@@ -1,12 +1,4 @@
-{
-  "name": "AppPAL Store",
-  "categories": [
-    "weighttracker",
-    "rss",
-    "password",
-    "messaging",
-    "flashlight",
-    "antivirus",
-    "angrybirds"
-  ]
+{ "name": "Example Store",
+  "categories": ["Games"]
 }
+
